@@ -1,0 +1,204 @@
+Response Handling & Validations in Rest Assured
+When testing APIs, handling responses efficiently is critical. This includes validating JSON schema, verifying response times,
+checking for specific keys/values, handling null values, and managing paginated responses.
+
+============================================================================================================================================================
+
+1️⃣ How do you validate a JSON Schema in Rest Assured?
+Why? Schema validation ensures that the response structure adheres to the expected format.
+How? Use the json-schema-validator dependency.
+
+Step 1: Add JSON Schema Validator Dependency in pom.xml
+
+<dependency>
+    <groupId>io.rest-assured</groupId>
+    <artifactId>json-schema-validator</artifactId>
+    <version>5.3.0</version>
+</dependency>
+
+Step 2: Validate JSON Schema
+Assume we have a schema file userSchema.json stored in src/test/resources/schemas/userSchema.json.
+
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
+
+given()
+    .when().get("https://api.example.com/users/1")
+    .then().assertThat().body(matchesJsonSchemaInClasspath("schemas/userSchema.json"));
+
+============================================================================================================================================================
+
+
+2️⃣ How do you handle null values in JSON responses?
+Why? Some APIs return null instead of missing values, which can cause test failures.
+How? Use hasKey() to check the presence of keys before extracting values.
+
+Response response = given().when().get("https://api.example.com/users/1");
+
+JsonPath jsonPath = response.jsonPath();
+if (jsonPath.get("email") != null) {
+    System.out.println("Email: " + jsonPath.getString("email"));
+} else {
+    System.out.println("Email is null");
+}
+
+✅ Alternative approach using Rest Assured assertions
+
+given()
+    .when().get("https://api.example.com/users/1")
+    .then().body("email", either(notNullValue()).or(equalTo("")));
+
+============================================================================================================================================================
+
+
+3️⃣ How do you verify response time in Rest Assured?
+Why? Response time validation ensures that APIs meet performance expectations.
+How? Use .time() to assert response time.
+
+given()
+    .when().get("https://api.example.com/data")
+    .then().time(lessThan(2000L)); // Ensure response time is under 2 seconds
+
+✅ Extracting response time dynamically
+
+long responseTime = given()
+    .when().get("https://api.example.com/data")
+    .time();
+
+System.out.println("Response Time: " + responseTime + " ms");
+
+============================================================================================================================================================
+
+4️⃣ How do you check if a JSON response contains a specific key-value pair?
+Why? This is useful for verifying if a response includes expected data.
+How? Use hasEntry() for maps and hasItem() for lists.
+
+given()
+    .when().get("https://api.example.com/users/1")
+    .then().body("", hasEntry("name", "John Doe"));
+
+✅ For lists of objects
+
+given()
+    .when().get("https://api.example.com/users")
+    .then().body("name", hasItem("John Doe"));
+
+============================================================================================================================================================
+
+
+5️⃣ How do you handle pagination in API responses?
+Why? Some APIs return large datasets in pages (e.g., ?page=1, ?page=2).
+How? Loop through pages until all data is retrieved.
+
+int page = 1;
+boolean hasNextPage = true;
+
+while (hasNextPage) {
+    Response response = given()
+        .queryParam("page", page)
+        .when().get("https://api.example.com/users");
+
+    List<String> users = response.jsonPath().getList("data");
+    System.out.println("Page " + page + " Users: " + users);
+
+    hasNextPage = response.jsonPath().getBoolean("has_next"); // Assuming API provides a `has_next` flag
+    page++;
+}
+
+============================================================================================================================================================
+
+
+Additional Questions on Response Handling & Validations
+
+6️⃣ How do you extract a list of values from a JSON response?
+
+Response response = given().when().get("https://api.example.com/users");
+
+List<String> names = response.jsonPath().getList("data.name");
+System.out.println("User Names: " + names);
+
+============================================================================================================================================================
+
+
+7️⃣ How do you count the number of JSON array elements?
+
+Response response = given().when().get("https://api.example.com/users");
+
+int count = response.jsonPath().getList("data").size();
+System.out.println("Total Users: " + count);
+
+============================================================================================================================================================
+
+
+8️⃣ How do you extract a nested JSON object in Rest Assured?
+Example JSON Response:
+
+{
+  "user": {
+    "id": 101,
+    "name": "John Doe",
+    "address": {
+      "city": "New York",
+      "zipcode": "10001"
+    }
+  }
+}
+
+Extracting nested values:
+
+Response response = given().when().get("https://api.example.com/user/101");
+
+String city = response.jsonPath().getString("user.address.city");
+System.out.println("City: " + city);
+
+============================================================================================================================================================
+
+
+9️⃣ How do you validate response headers?
+
+given()
+    .when().get("https://api.example.com/data")
+    .then()
+    .header("Content-Type", equalTo("application/json"))
+    .header("Cache-Control", containsString("no-cache"));
+
+============================================================================================================================================================
+
+
+🔟 How do you extract a response cookie in Rest Assured?
+
+Response response = given().when().get("https://api.example.com/session");
+
+String sessionId = response.getCookie("JSESSIONID");
+System.out.println("Session ID: " + sessionId);
+
+============================================================================================================================================================
+
+
+1️⃣1️⃣ How do you verify that a JSON response does NOT contain a certain key?
+
+given()
+    .when().get("https://api.example.com/users/1")
+    .then().body("$", not(hasKey("password")));
+
+============================================================================================================================================================
+
+
+1️⃣2️⃣ How do you check that all elements in an array contain a specific value?
+
+given()
+    .when().get("https://api.example.com/users")
+    .then().body("data.email", everyItem(endsWith("@example.com")));
+
+============================================================================================================================================================
+
+1️⃣3️⃣ How do you extract values using JsonPath expressions in Rest Assured?
+
+Response response = given().when().get("https://api.example.com/orders");
+
+List<Integer> orderIds = response.jsonPath().getList("orders.findAll { it.amount > 500 }.id");
+System.out.println("Orders with amount > 500: " + orderIds);
+
+============================================================================================================================================================
+
+
+

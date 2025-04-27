@@ -1,0 +1,225 @@
+1. Sort JSON objects based on a field (e.g., sorting users by name)
+JSON Example:
+
+{
+  "users": [
+    { "id": 1, "name": "Zara" },
+    { "id": 2, "name": "Amit" },
+    { "id": 3, "name": "John" }
+  ]
+}
+Solution (Sorting by Name in Ascending Order):
+
+Response response = given()
+    .when().get("https://api.example.com/users");
+
+JsonPath jsonPath = response.jsonPath();
+List<Map<String, Object>> users = jsonPath.getList("users");
+
+users.sort(Comparator.comparing(user -> (String) user.get("name")));
+
+for (Map<String, Object> user : users) {
+    System.out.println(user.get("name"));
+}
+
+============================================================================================================================================================
+
+2. Filter out specific data (e.g., finding users with more than 5 orders)
+JSON Example:
+
+{
+  "users": [
+    { "id": 1, "name": "Alice", "orders": 3 },
+    { "id": 2, "name": "Bob", "orders": 6 },
+    { "id": 3, "name": "Charlie", "orders": 8 }
+  ]
+}
+Solution (Filtering Users with Orders > 5):
+
+Response response = given()
+    .when().get("https://api.example.com/users");
+
+JsonPath jsonPath = response.jsonPath();
+List<Map<String, Object>> users = jsonPath.getList("users");
+
+for (Map<String, Object> user : users) {
+    if ((Integer) user.get("orders") > 5) {
+        System.out.println(user.get("name"));
+    }
+}
+
+============================================================================================================================================================
+
+3. Extract specific JSON array values
+JSON Example:
+
+{
+  "books": [
+    { "title": "Java Fundamentals", "author": "John Doe" },
+    { "title": "Rest Assured Guide", "author": "Amit Sharma" }
+  ]
+}
+Solution (Extracting Book Titles):
+
+Response response = given()
+    .when().get("https://api.example.com/books");
+
+JsonPath jsonPath = response.jsonPath();
+List<String> bookTitles = jsonPath.getList("books.title");
+
+System.out.println("Book Titles: " + bookTitles);
+
+============================================================================================================================================================
+
+4. Count the number of JSON array elements
+JSON Example:
+
+{
+  "employees": [
+    { "id": 1, "name": "John" },
+    { "id": 2, "name": "Alice" },
+    { "id": 3, "name": "Bob" }
+  ]
+}
+Solution (Counting Number of Employees):
+
+Response response = given()
+    .when().get("https://api.example.com/employees");
+
+JsonPath jsonPath = response.jsonPath();
+int count = jsonPath.getList("employees").size();
+
+System.out.println("Number of Employees: " + count);
+
+============================================================================================================================================================
+
+5. Handle duplicate values in JSON
+JSON Example:
+
+{
+  "products": [
+    { "id": 1, "name": "Laptop" },
+    { "id": 2, "name": "Phone" },
+    { "id": 3, "name": "Laptop" }
+  ]
+}
+Solution (Removing Duplicates from JSON Response):
+
+Response response = given()
+    .when().get("https://api.example.com/products");
+
+JsonPath jsonPath = response.jsonPath();
+List<String> productNames = jsonPath.getList("products.name");
+
+Set<String> uniqueProducts = new HashSet<>(productNames);
+
+System.out.println("Unique Products: " + uniqueProducts);
+
+============================================================================================================================================================
+
+6. Extract values using JsonPath expressions
+JSON Example:
+
+{
+  "company": {
+    "employees": [
+      { "id": 1, "name": "John", "department": "HR" },
+      { "id": 2, "name": "Alice", "department": "IT" }
+    ]
+  }
+}
+Solution (Extracting Employee Names Using JsonPath Expression):
+
+Response response = given()
+    .when().get("https://api.example.com/company");
+
+JsonPath jsonPath = response.jsonPath();
+List<String> employeeNames = jsonPath.getList("company.employees.name");
+
+System.out.println("Employees: " + employeeNames);
+
+============================================================================================================================================================
+
+7. Convert JSON response to a Java Map/List
+JSON Example:
+
+{
+  "user": {
+    "id": 101,
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+}
+Solution (Converting JSON to Java Map):
+
+Response response = given()
+    .when().get("https://api.example.com/user");
+
+JsonPath jsonPath = response.jsonPath();
+Map<String, Object> userMap = jsonPath.getMap("user");
+
+System.out.println("User Details: " + userMap);
+
+============================================================================================================================================================
+
+8. Extract Nested JSON values
+JSON Example:
+
+{
+  "department": {
+    "name": "IT",
+    "employees": [
+      { "id": 1, "name": "Alice", "skills": ["Java", "SQL"] },
+      { "id": 2, "name": "Bob", "skills": ["Python", "Docker"] }
+    ]
+  }
+}
+Solution (Extracting Employee Skills from Nested JSON):
+
+Response response = given()
+    .when().get("https://api.example.com/department");
+
+JsonPath jsonPath = response.jsonPath();
+List<List<String>> skills = jsonPath.getList("department.employees.skills");
+
+System.out.println("Employee Skills: " + skills);
+
+============================================================================================================================================================
+
+9. Validate if JSON contains a specific key
+
+JSON Example:
+
+{
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+}
+Solution (Check if JSON Contains 'email' Key):
+
+given()
+    .when().get("https://api.example.com/user")
+    .then().body("user", hasKey("email"));
+
+======================================================================================================================================================================
+
+10. Extract a list of values from JSON array using Rest Assured
+JSON Example:
+
+{
+  "students": [
+    { "id": 1, "name": "Amit" },
+    { "id": 2, "name": "Priya" }
+  ]
+}
+Solution (Extracting Student Names as List):
+
+Response response = given()
+    .when().get("https://api.example.com/students");
+
+JsonPath jsonPath = response.jsonPath();
+List<String> studentNames = jsonPath.getList("students.name");
+
+System.out.println("Student Names: " + studentNames);

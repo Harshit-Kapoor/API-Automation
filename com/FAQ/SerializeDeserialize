@@ -1,0 +1,257 @@
+Serialization and deserialization in Rest Assured involve converting Java objects to JSON and vice versa.
+
+Serialization: Converting a Java object into a JSON payload.
+Deserialization: Converting a JSON response into a Java object.
+🚀 Example with a Complex JSON Structure
+Let's take an extremely nested and complex JSON example to understand how we serialize and deserialize using Rest Assured and Jackson.
+
+🔹 Tough JSON Example:
+
+{
+  "user": {
+    "id": 101,
+    "name": "John Doe",
+    "contacts": [
+      {
+        "type": "email",
+        "details": "john.doe@example.com"
+      },
+      {
+        "type": "phone",
+        "details": "+1234567890"
+      }
+    ],
+    "addresses": {
+      "home": {
+        "street": "123 Main St",
+        "city": "New York",
+        "zipcode": "10001"
+      },
+      "work": {
+        "street": "456 Office Rd",
+        "city": "Los Angeles",
+        "zipcode": "90001"
+      }
+    },
+    "roles": [
+      {
+        "roleName": "Admin",
+        "permissions": ["READ", "WRITE", "DELETE"]
+      },
+      {
+        "roleName": "User",
+        "permissions": ["READ"]
+      }
+    ]
+  }
+}
+
+============================================================================================================================================================
+
+✅ 1. Serialization (Java to JSON)
+We need to create POJO (Plain Old Java Object) classes that match this JSON structure.
+
+POJOs for Serialization
+(a) Contact.java
+
+public class Contact {
+    private String type;
+    private String details;
+
+    // Constructors
+    public Contact() {}
+    public Contact(String type, String details) {
+        this.type = type;
+        this.details = details;
+    }
+
+    // Getters and Setters
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+    
+    public String getDetails() { return details; }
+    public void setDetails(String details) { this.details = details; }
+}
+
+============================================================================================================================================================
+
+(b) Address.java
+
+public class Address {
+    private String street;
+    private String city;
+    private String zipcode;
+
+    public Address() {}
+    public Address(String street, String city, String zipcode) {
+        this.street = street;
+        this.city = city;
+        this.zipcode = zipcode;
+    }
+
+    public String getStreet() { return street; }
+    public void setStreet(String street) { this.street = street; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
+    public String getZipcode() { return zipcode; }
+    public void setZipcode(String zipcode) { this.zipcode = zipcode; }
+}
+
+============================================================================================================================================================
+
+(c) Role.java
+
+import java.util.List;
+
+public class Role {
+    private String roleName;
+    private List<String> permissions;
+
+    public Role() {}
+    public Role(String roleName, List<String> permissions) {
+        this.roleName = roleName;
+        this.permissions = permissions;
+    }
+
+    public String getRoleName() { return roleName; }
+    public void setRoleName(String roleName) { this.roleName = roleName; }
+
+    public List<String> getPermissions() { return permissions; }
+    public void setPermissions(List<String> permissions) { this.permissions = permissions; }
+}
+
+============================================================================================================================================================
+
+(d) User.java
+
+import java.util.List;
+import java.util.Map;
+
+public class User {
+    private int id;
+    private String name;
+    private List<Contact> contacts;
+    private Map<String, Address> addresses;
+    private List<Role> roles;
+
+    public User() {}
+
+    public User(int id, String name, List<Contact> contacts, Map<String, Address> addresses, List<Role> roles) {
+        this.id = id;
+        this.name = name;
+        this.contacts = contacts;
+        this.addresses = addresses;
+        this.roles = roles;
+    }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public List<Contact> getContacts() { return contacts; }
+    public void setContacts(List<Contact> contacts) { this.contacts = contacts; }
+
+    public Map<String, Address> getAddresses() { return addresses; }
+    public void setAddresses(Map<String, Address> addresses) { this.addresses = addresses; }
+
+    public List<Role> getRoles() { return roles; }
+    public void setRoles(List<Role> roles) { this.roles = roles; }
+}
+
+============================================================================================================================================================
+
+🚀 Serialization with Rest Assured
+Now, we serialize this Java object into JSON and send it in a POST request.
+
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
+
+public class SerializationExample {
+    public static void main(String[] args) {
+        // Create contacts
+        List<Contact> contacts = Arrays.asList(
+            new Contact("email", "john.doe@example.com"),
+            new Contact("phone", "+1234567890")
+        );
+
+        // Create addresses
+        Map<String, Address> addresses = new HashMap<>();
+        addresses.put("home", new Address("123 Main St", "New York", "10001"));
+        addresses.put("work", new Address("456 Office Rd", "Los Angeles", "90001"));
+
+        // Create roles
+        List<Role> roles = Arrays.asList(
+            new Role("Admin", Arrays.asList("READ", "WRITE", "DELETE")),
+            new Role("User", Arrays.asList("READ"))
+        );
+
+        // Create user object
+        User user = new User(101, "John Doe", contacts, addresses, roles);
+
+        // Send POST request with JSON body
+        RestAssured.baseURI = "https://reqres.in/api";
+
+        given()
+            .contentType("application/json")
+            .body(user)  // Serialize Java object to JSON
+        .when()
+            .post("/users")
+        .then()
+            .statusCode(201)  // Assert status code
+            .log().all();
+    }
+}
+
+
+============================================================================================================================================================
+============================================================================================================================================================
+============================================================================================================================================================
+
+✅ 2. Deserialization (JSON to Java Object)
+Now, we fetch the response and convert it into a Java object.
+
+
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+public class DeserializationExample {
+    public static void main(String[] args) {
+        RestAssured.baseURI = "https://reqres.in/api";
+
+        Response response = 
+            given()
+                .contentType("application/json")
+            .when()
+                .get("/users/101")  // Assuming user with ID 101 exists
+            .then()
+                .statusCode(200)
+                .extract().response();
+
+        // Convert JSON response to Java object
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            User user = objectMapper.readValue(response.asString(), User.class);
+            System.out.println("User Name: " + user.getName());
+            System.out.println("Home Address: " + user.getAddresses().get("home").getStreet());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+============================================================================================================================================================
+
+🎯 Key Takeaways
+Serialization converts Java objects into JSON using body(Object).
+Deserialization converts JSON responses back into Java objects using ObjectMapper.
+Complex JSON structures can be handled by creating nested POJOs and lists/maps.
+Always validate responses with status codes and logs to debug easily.
+Let me know if you need more variations of tough JSON scenarios

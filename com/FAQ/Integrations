@@ -1,0 +1,477 @@
+Integration & Framework Questions in Rest Assured
+
+1. How do you integrate Rest Assured with TestNG?
+
+Rest Assured can be used with TestNG to structure API tests with assertions and reporting.
+
+Step 1: Add TestNG Dependency
+
+<dependency>
+    <groupId>org.testng</groupId>
+    <artifactId>testng</artifactId>
+    <version>7.7.1</version>
+    <scope>test</scope>
+</dependency>
+
+Step 2: Write a TestNG API Test
+
+import io.restassured.RestAssured;
+import org.testng.annotations.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class APITest {
+
+    @Test
+    public void validateResponse() {
+        given()
+            .when().get("https://api.example.com/users/1")
+            .then().statusCode(200)
+                   .body("name", equalTo("John Doe"));
+    }
+}
+
+============================================================================================================================================================
+
+2. How do you integrate Rest Assured with JUnit?
+
+JUnit provides assertions and lifecycle management for API tests.
+
+Step 1: Add JUnit Dependency
+
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <version>5.9.1</version>
+    <scope>test</scope>
+</dependency>
+
+Step 2: Write a JUnit API Test
+
+import org.junit.jupiter.api.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class JUnitRestAssuredTest {
+
+    @Test
+    public void validateUserData() {
+        given()
+            .when().get("https://api.example.com/users/1")
+            .then().statusCode(200)
+                   .body("email", endsWith("@example.com"));
+    }
+}
+
+============================================================================================================================================================
+
+3. How do you integrate Rest Assured with Cucumber (BDD)?
+
+Rest Assured can be used with Cucumber for BDD-style API testing.
+
+Step 1: Add Cucumber Dependencies
+
+<dependency>
+    <groupId>io.cucumber</groupId>
+    <artifactId>cucumber-java</artifactId>
+    <version>7.14.0</version>
+</dependency>
+<dependency>
+    <groupId>io.cucumber</groupId>
+    <artifactId>cucumber-testng</artifactId>
+    <version>7.14.0</version>
+</dependency>
+
+Step 2: Create a Feature File (users.feature)
+
+Feature: Validate User API
+  Scenario: Fetch user details
+    Given API endpoint "https://api.example.com/users/1"
+    When I send a GET request
+    Then response status code should be 200
+    And response should contain "John Doe"
+
+Step 3: Write Cucumber Step Definitions
+
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class UserAPISteps {
+    Response response;
+
+    @Given("API endpoint {string}")
+    public void api_endpoint(String url) {
+        baseURI = url;
+    }
+
+    @When("I send a GET request")
+    public void send_get_request() {
+        response = when().get();
+    }
+
+    @Then("response status code should be {int}")
+    public void verify_status_code(int statusCode) {
+        assertEquals(statusCode, response.statusCode());
+    }
+
+    @Then("response should contain {string}")
+    public void verify_response_body(String name) {
+        assertTrue(response.asString().contains(name));
+    }
+}
+
+============================================================================================================================================================
+
+4. How do you integrate Rest Assured with CI/CD pipelines (Jenkins/GitHub Actions)?
+
+Step 1: Add API Tests in pom.xml
+
+<plugins>
+    <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M7</version>
+    </plugin>
+</plugins>
+
+Step 2: Create a Jenkins Job
+
+In Jenkins, create a new Pipeline.
+
+Add this script to execute tests:
+
+mvn clean test
+
+Configure Post-Build Actions to generate reports.
+
+✅ For GitHub Actions, use .github/workflows/api-tests.yml
+
+name: API Tests
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Run API Tests
+        run: mvn clean test
+
+============================================================================================================================================================
+
+5. How do you implement parallel execution in Rest Assured?
+
+Parallel execution speeds up test execution by running multiple tests simultaneously.
+
+Step 1: Enable Parallel Execution in TestNG (testng.xml)
+
+<suite name="API Suite" parallel="methods" thread-count="5">
+    <test name="API Tests">
+        <classes>
+            <class name="com.example.APITest"/>
+        </classes>
+    </test>
+</suite>
+
+Step 2: Write Parallel Test Cases
+
+import org.testng.annotations.Test;
+
+public class ParallelTest {
+
+    @Test
+    public void test1() {
+        given().when().get("https://api.example.com/users/1")
+               .then().statusCode(200);
+    }
+
+    @Test
+    public void test2() {
+        given().when().get("https://api.example.com/users/2")
+               .then().statusCode(200);
+    }
+}
+
+✅ Now, both tests run in parallel!
+
+============================================================================================================================================================
+
+Integration & Framework Questions in Rest Assured
+Testing RESTful APIs efficiently requires integration with testing frameworks, data-driven testing, POJO usage, and CI/CD pipeline automation. Let's explore practical solutions.
+
+
+1️⃣ How do you integrate Rest Assured with TestNG?
+Rest Assured can be used with TestNG to structure API tests with assertions and reporting.
+
+Step 1: Add TestNG Dependency
+xml
+Copy
+Edit
+<dependency>
+    <groupId>org.testng</groupId>
+    <artifactId>testng</artifactId>
+    <version>7.7.1</version>
+    <scope>test</scope>
+</dependency>
+Step 2: Write a TestNG API Test
+
+import io.restassured.RestAssured;
+import org.testng.annotations.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class APITest {
+    
+    @Test
+    public void validateResponse() {
+        given()
+            .when().get("https://api.example.com/users/1")
+            .then().statusCode(200)
+                   .body("name", equalTo("John Doe"));
+    }
+}
+✅ Run it using TestNG runner in IntelliJ.
+
+============================================================================================================================================================
+
+2️⃣ How do you integrate Rest Assured with JUnit?
+JUnit provides assertions and lifecycle management for API tests.
+
+Step 1: Add JUnit Dependency
+xml
+Copy
+Edit
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <version>5.9.1</version>
+    <scope>test</scope>
+</dependency>
+Step 2: Write a JUnit API Test
+
+import org.junit.jupiter.api.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class JUnitRestAssuredTest {
+
+    @Test
+    public void validateUserData() {
+        given()
+            .when().get("https://api.example.com/users/1")
+            .then().statusCode(200)
+                   .body("email", endsWith("@example.com"));
+    }
+}
+✅ Run using mvn test or JUnit runner.
+
+============================================================================================================================================================
+
+3️⃣ How do you integrate Rest Assured with Cucumber (BDD)?
+Rest Assured can be used with Cucumber for BDD-style API testing.
+
+Step 1: Add Cucumber Dependencies
+xml
+Copy
+Edit
+<dependency>
+    <groupId>io.cucumber</groupId>
+    <artifactId>cucumber-java</artifactId>
+    <version>7.14.0</version>
+</dependency>
+<dependency>
+    <groupId>io.cucumber</groupId>
+    <artifactId>cucumber-testng</artifactId>
+    <version>7.14.0</version>
+</dependency>
+Step 2: Create a Feature File (users.feature)
+gherkin
+Copy
+Edit
+Feature: Validate User API
+  Scenario: Fetch user details
+    Given API endpoint "https://api.example.com/users/1"
+    When I send a GET request
+    Then response status code should be 200
+    And response should contain "John Doe"
+Step 3: Write Cucumber Step Definitions
+
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class UserAPISteps {
+    Response response;
+
+    @Given("API endpoint {string}")
+    public void api_endpoint(String url) {
+        baseURI = url;
+    }
+
+    @When("I send a GET request")
+    public void send_get_request() {
+        response = when().get();
+    }
+
+    @Then("response status code should be {int}")
+    public void verify_status_code(int statusCode) {
+        assertEquals(statusCode, response.statusCode());
+    }
+
+    @Then("response should contain {string}")
+    public void verify_response_body(String name) {
+        assertTrue(response.asString().contains(name));
+    }
+}
+✅ Run it using Cucumber runner.
+
+============================================================================================================================================================
+
+4️⃣ How do you handle data-driven testing using Rest Assured?
+Use TestNG DataProviders or Apache POI for Excel.
+
+Example: Using TestNG DataProvider
+
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class DataDrivenTest {
+
+    @DataProvider(name = "userData")
+    public Object[][] userData() {
+        return new Object[][] {
+            {"John", "Doe"},
+            {"Jane", "Smith"}
+        };
+    }
+
+    @Test(dataProvider = "userData")
+    public void validateUsers(String firstName, String lastName) {
+        given()
+            .queryParam("firstName", firstName)
+            .queryParam("lastName", lastName)
+            .when().get("https://api.example.com/users")
+            .then().statusCode(200);
+    }
+}
+
+============================================================================================================================================================
+
+5️⃣ How do you use POJO (Plain Old Java Objects) with Rest Assured?
+Using POJOs makes it easier to handle request/response objects.
+
+Step 1: Create a POJO for User
+
+public class User {
+    private String name;
+    private int age;
+
+    public User(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    // Getters & Setters
+}
+Step 2: Send a POST Request Using POJO
+
+User user = new User("John Doe", 30);
+
+given()
+    .contentType("application/json")
+    .body(user)
+    .when().post("https://api.example.com/users")
+    .then().statusCode(201);
+
+============================================================================================================================================================
+
+6️⃣ What are the advantages of using Rest Assured over Postman?
+Feature	                         Rest Assured	Postman
+Automation	                     Fully automated	    Manual + scripts
+Integration	                     Works with CI/CD	    Limited CI/CD support
+Programming	                     Uses Java	            Uses JavaScript for scripts
+Reusability	                     High	                Low
+
+============================================================================================================================================================
+
+7️⃣ How do you integrate Rest Assured with CI/CD pipelines (Jenkins/GitHub Actions)?
+
+Step 1: Add API Tests in pom.xml
+xml
+Copy
+Edit
+<plugins>
+    <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M7</version>
+    </plugin>
+</plugins>
+Step 2: Create a Jenkins Job
+In Jenkins, create a new Pipeline.
+Add this script to execute tests:
+sh
+Copy
+Edit
+mvn clean test
+Configure Post-Build Actions to generate reports.
+✅ For GitHub Actions, use .github/workflows/api-tests.yml
+
+yaml
+Copy
+Edit
+name: API Tests
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Run API Tests
+        run: mvn clean test
+
+============================================================================================================================================================
+
+8️⃣ How do you implement parallel execution in Rest Assured?
+Parallel execution speeds up test execution by running multiple tests simultaneously.
+
+Step 1: Enable Parallel Execution in TestNG (testng.xml)
+xml
+Copy
+Edit
+<suite name="API Suite" parallel="methods" thread-count="5">
+    <test name="API Tests">
+        <classes>
+            <class name="com.example.APITest"/>
+        </classes>
+    </test>
+</suite>
+Step 2: Write Parallel Test Cases
+
+import org.testng.annotations.Test;
+
+public class ParallelTest {
+
+    @Test
+    public void test1() {
+        given().when().get("https://api.example.com/users/1")
+               .then().statusCode(200);
+    }
+
+    @Test
+    public void test2() {
+        given().when().get("https://api.example.com/users/2")
+               .then().statusCode(200);
+    }
+}
+✅ Now, both tests run in parallel!

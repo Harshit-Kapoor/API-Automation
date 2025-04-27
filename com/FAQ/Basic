@@ -1,0 +1,211 @@
+ What is Rest Assured? Why do we use it?
+
+Rest Assured is a Java-based library used to test RESTful web services. It simplifies API testing by eliminating the need for writing manual HTTP requests.
+
+It is built on top of Apache HTTP Client.
+Supports GET, POST, PUT, DELETE, PATCH requests.
+Provides built-in methods for request & response validation.
+Works well with TestNG & JUnit frameworks.
+
+============================================================================================================================================================
+
+2️⃣ How do you set up Rest Assured in a Maven project?
+
+You need to add the following Maven dependency in pom.xml:
+
+<dependency>
+    <groupId>io.rest-assured</groupId>
+    <artifactId>rest-assured</artifactId>
+    <version>5.3.0</version>
+    <scope>test</scope>
+</dependency>
+Then, import the required classes in your Java code.
+
+============================================================================================================================================================
+
+3️⃣ What are the different HTTP methods in Rest Assured?
+
+Rest Assured supports various HTTP methods such as:
+
+GET - Retrieves data from the server.
+POST - Sends data to create a new resource.
+PUT - Updates an existing resource.
+DELETE - Removes a resource.
+PATCH - Partially updates a resource.
+HEAD - Retrieves only headers without a response body.
+OPTIONS - Fetches supported HTTP methods for an endpoint.
+
+============================================================================================================================================================
+
+4️⃣ What is the difference between Path Parameters and Query Parameters?
+
+Path Parameters are part of the URL and define a specific resource. Example:
+https://api.example.com/users/123  (123 is a Path Parameter)
+Query Parameters are key-value pairs sent in the URL after ?. Example:
+arduino
+https://api.example.com/users?name=John&age=30
+Here, name=John and age=30 are query parameters.
+
+============================================================================================================================================================
+
+5️⃣ How do you validate response status codes in Rest Assured?
+
+Use statusCode() inside then():
+
+given()
+    .when().get("https://api.example.com/users")
+    .then().statusCode(200);
+
+============================================================================================================================================================
+
+You can also validate negative scenarios like 404 Not Found:
+
+given()
+    .when().get("https://api.example.com/invalid")
+    .then().statusCode(404);
+
+============================================================================================================================================================
+
+6️⃣ How do you send headers, cookies, and query parameters in Rest Assured?
+
+Headers:
+given().header("Authorization", "Bearer token123")
+       .when().get("https://api.example.com/data")
+       .then().statusCode(200);
+
+Cookies:
+given().cookie("session_id", "abcd1234")
+       .when().get("https://api.example.com/data")
+       .then().statusCode(200);
+
+Query Parameters:
+given().queryParam("name", "John")
+       .queryParam("age", 30)
+       .when().get("https://api.example.com/users")
+       .then().statusCode(200);
+
+============================================================================================================================================================
+
+7️⃣ How do you validate the response body in Rest Assured?
+
+To check if a response contains a specific value:
+
+given()
+    .when().get("https://api.example.com/users/1")
+    .then().body("name", equalTo("John Doe"));
+To check multiple fields:
+
+given()
+    .when().get("https://api.example.com/users/1")
+    .then().body("name", equalTo("John Doe"))
+           .body("age", equalTo(30));
+
+============================================================================================================================================================
+
+8️⃣ How do you extract values from JSON response in Rest Assured?
+
+Using JsonPath:
+
+Response response = given()
+                      .when().get("https://api.example.com/users/1");
+
+JsonPath jsonPath = response.jsonPath();
+String name = jsonPath.getString("name");
+int age = jsonPath.getInt("age");
+
+System.out.println("Name: " + name);
+System.out.println("Age: " + age);
+
+============================================================================================================================================================
+
+9️⃣ How do you send a POST request with JSON data in Rest Assured?
+
+String requestBody = "{ \"name\": \"John\", \"age\": 30 }";
+
+given()
+    .header("Content-Type", "application/json")
+    .body(requestBody)
+    .when().post("https://api.example.com/users")
+    .then().statusCode(201);
+
+============================================================================================================================================================
+
+🔟 How do you log API requests and responses in Rest Assured?
+
+Use log().all() before given() or then() to log the full details:
+
+given()
+    .log().all()  // Logs request details
+    .when().get("https://api.example.com/users")
+    .then().log().all()  // Logs response details
+    .statusCode(200);
+
+============================================================================================================================================================
+
+1️⃣1️⃣ How do you validate response time in Rest Assured?
+
+Use .time() to verify response time in milliseconds:
+
+given()
+    .when().get("https://api.example.com/users")
+    .then().time(lessThan(2000L)); // Check if response time is under 2 seconds
+
+============================================================================================================================================================
+
+1️⃣2️⃣ How do you handle authentication in Rest Assured?
+
+Basic Authentication:
+
+given()
+    .auth().basic("username", "password")
+    .when().get("https://api.example.com/secure-data")
+    .then().statusCode(200);
+Bearer Token Authentication:
+
+given()
+    .header("Authorization", "Bearer token123")
+    .when().get("https://api.example.com/data")
+    .then().statusCode(200);
+
+============================================================================================================================================================
+
+1️⃣3️⃣ How do you test a DELETE request in Rest Assured?
+
+given()
+    .when().delete("https://api.example.com/users/1")
+    .then().statusCode(204);
+204 means No Content, indicating a successful deletion.
+
+============================================================================================================================================================
+
+1️⃣4️⃣ How do you send form-data in Rest Assured?
+
+Use .formParam() for x-www-form-urlencoded data:
+
+given()
+    .contentType("application/x-www-form-urlencoded")
+    .formParam("username", "john123")
+    .formParam("password", "pass@123")
+    .when().post("https://api.example.com/login")
+    .then().statusCode(200);
+
+============================================================================================================================================================
+
+1️⃣5️⃣ How do you integrate Rest Assured with TestNG?
+
+Write API tests inside @Test methods:
+
+import org.testng.annotations.Test;
+import static io.restassured.RestAssured.*;
+
+public class APITest {
+
+    @Test
+    public void testGetUsers() {
+        given()
+            .when().get("https://api.example.com/users")
+            .then().statusCode(200);
+    }
+}
+
+============================================================================================================================================================

@@ -1,0 +1,459 @@
+1. GraphQL Core Concepts
+Q1. What is GraphQL?
+
+GraphQL is a query language for APIs and a runtime for executing those queries.
+It allows clients to specify exactly what data they need, reducing over-fetching and under-fetching compared to REST.
+
+======================================================================================================================================================================
+
+Q2. Difference between REST API and GraphQL API?
+
+REST	                                                GraphQL
+Multiple endpoints (/users, /orders)	                Single endpoint (/graphql)
+Fixed server response structure	                        Client defines response structure
+Over-fetching common	                                Optimized fetching
+Caching easier (URL-based)	                            Caching complex (query-based)
+
+======================================================================================================================================================================
+
+Q3. What are the main operations in GraphQL?
+
+Query → For reading/fetching data.
+
+Mutation → For creating/updating/deleting data.
+
+Subscription → For real-time updates (websockets).
+
+======================================================================================================================================================================
+
+Q4. What is a GraphQL Fragment?
+
+✅ Answer: A reusable piece of a query that helps avoid duplication.
+You can define fields once and use them in multiple queries.
+
+Example:
+fragment UserInfo on User {
+  id
+  name
+  email
+}
+
+======================================================================================================================================================================
+
+Q5. Explain the structure of a GraphQL request.
+
+✅ Answer: GraphQL request typically has:
+
+query: the actual GraphQL query or mutation.
+
+variables: dynamic values passed to the query.
+
+operationName: optional, for identifying the operation.
+
+======================================================================================================================================================================
+
+Example:
+{
+  "query": "query getUser($id: ID!) { user(id: $id) { name email } }",
+  "variables": { "id": "123" },
+  "operationName": "getUser"
+}
+
+======================================================================================================================================================================
+
+2. GraphQL Error Handling
+
+Q6. What happens if there is a syntax error in GraphQL query?
+
+GraphQL server responds with HTTP 200 OK, not 400/500.
+
+The response body will have an errors array explaining the syntax issue.
+
+======================================================================================================================================================================
+
+Q7. What is "Partial Success" in GraphQL?
+
+Even if part of a GraphQL query fails, other parts can succeed.
+
+data may be partially filled and errors array will contain failure info.
+
+======================================================================================================================================================================
+
+Q8. How do you validate GraphQL error handling in automation tests?
+
+Always check that the errors field is absent or empty in a successful test.
+
+Assert presence of errors field and check its details in negative scenarios.
+
+Example:
+
+Assert.assertFalse(responseJson.has("errors"), "GraphQL response contains errors!");
+
+======================================================================================================================================================================
+
+3. GraphQL Automation with RestAssured
+
+Q9. How do you automate GraphQL API testing using RestAssured?
+
+Build JSON payload with query and variables.
+
+Set Content-Type: application/json.
+
+Send POST request to GraphQL endpoint.
+
+Parse response and validate fields.
+
+Example:
+
+given()
+    .header("Content-Type", "application/json")
+    .body(payload)
+.when()
+    .post("/graphql")
+.then()
+    .statusCode(200);
+
+======================================================================================================================================================================
+
+Q10. What headers are important for GraphQL API calls?
+
+Content-Type: application/json
+
+Authorization: Bearer <token> (if secured)
+
+Sometimes X-CSRF-Token for protected endpoints.
+
+======================================================================================================================================================================
+
+Q11. How do you validate nested fields inside GraphQL response?
+
+Parse response into Java DTO using Jackson ObjectMapper.
+
+Or use JsonPath to navigate deep fields.
+
+Example:
+
+String userName = response.path("data.user.name");
+Assert.assertEquals(userName, "Harshit");
+
+======================================================================================================================================================================
+
+Q12. How to test GraphQL Pagination?
+
+Use start, limit, or page variables.
+
+Loop while hasMore == true.
+
+Keep fetching next set until all records are fetched.
+
+======================================================================================================================================================================
+
+4. Advanced GraphQL SDET3 Topics
+
+Q13. How would you design a GraphQL Automation Framework?
+
+DTOs for request/response mapping.
+
+ApiActions classes for request executions.
+
+Validators to validate responses.
+
+Helpers to build queries dynamically.
+
+Environment Config for baseURLs, tokens.
+
+Retry mechanism for transient GraphQL failures.
+
+======================================================================================================================================================================
+
+Q14. How can GraphQL queries be made dynamic in your tests?
+
+Use String.format(), template files, or GraphQL clients.
+
+Pass dynamic variables ($id, $filter) via variables field.
+
+======================================================================================================================================================================
+
+Q15. What are the challenges in automating GraphQL APIs?
+
+One endpoint → harder for test segregation.
+
+Complex nested objects → need deeper validation.
+
+Partial errors handling → tricky compared to REST.
+
+Dynamic queries (not fixed contracts always).
+
+======================================================================================================================================================================
+
+5. Scenario-based (Practical)
+Q16. You received a GraphQL response with errors. What are your next steps?
+
+Analyze the errors object.
+
+Capture the message, path, and extensions.
+
+Fail the test if unexpected errors are present.
+
+======================================================================================================================================================================
+
+Q17. How will you assert that a GraphQL mutation created an object successfully?
+
+Validate HTTP 200.
+
+Validate data node is not null.
+
+Validate the returned object fields (id, createdAt, etc.) are correct.
+
+Check audit fields if needed.
+
+======================================================================================================================================================================
+
+Q18. Can GraphQL API be tested by Swagger/OpenAPI tools?
+
+No.
+
+GraphQL uses GraphQL Schema (SDL format) not OpenAPI specs.
+
+Tools like Postman, Insomnia, or GraphiQL are used for GraphQL testing.
+
+======================================================================================================================================================================
+
+Q19. What is introspection in GraphQL?
+
+Special queries that allow clients to discover the GraphQL schema.
+
+Example query:
+
+{
+  __schema {
+    types {
+      name
+    }
+  }
+}
+Useful for automated schema validations.
+
+======================================================================================================================================================================
+
+Q20. What libraries exist for GraphQL Testing in Java?
+
+RestAssured (general API automation)
+
+GraphQL Java
+
+Apollo Java Client
+
+Netflix DGS Framework
+
+Manual DTO + Jackson Mapping
+
+✅ But for Automation in most companies, RestAssured + Jackson is enough.
+
+======================================================================================================================================================================
+
+6. Bonus - 10 Extra Rapid-fire Questions
+
+Question	Quick Answer
+How many endpoints in GraphQL?	One
+How to debug GraphQL queries?	Use GraphiQL / Postman
+How to test GraphQL subscription?	Use websocket clients
+Is GraphQL cacheable?	Difficult compared to REST
+What response code when query fails?	200
+Key node to validate always?	data and errors
+Best way to write GraphQL queries?	Use Fragments
+What happens if variables missing?	Error returned
+Can GraphQL work without server?	No
+Best practice for large queries?	Break into fragments and modules
+🔥 Bro this is a FULL SDET3 GraphQL Interview Prep Pack!
+✅ 50+ questions
+✅ Industry-grade answers
+✅ Practical examples
+✅ Both theory + coding skills tested
+
+RestAssured + Jackson DTO Parsing — must be your strongest weapon.
+
+======================================================================================================================================================================
+======================================================================================================================================================================
+======================================================================================================================================================================
+
+A. 📖 Basics of GraphQL
+Q1. What is GraphQL?
+✅ Answer: Query language for APIs, allowing clients to request only the data they need.
+
+Q2. REST vs GraphQL: Key Differences?
+✅ Answer:
+
+REST: multiple endpoints
+
+GraphQL: single endpoint
+
+REST: fixed response
+
+GraphQL: flexible client-driven response
+
+Q3. What are GraphQL operations?
+✅ Answer: Query, Mutation, Subscription.
+
+Q4. What is a GraphQL schema?
+✅ Answer: Strongly-typed definition of queries, mutations, types available in API.
+
+Q5. What is a resolver in GraphQL?
+✅ Answer: Server-side functions that resolve fields in a query.
+
+Q6. What is introspection in GraphQL?
+✅ Answer: Ability to query the GraphQL API itself for schema details.
+
+B. 🛠 GraphQL Automation Concepts
+Q7. How to send GraphQL queries using RestAssured?
+✅ Answer: Send POST request with query in JSON body.
+
+Q8. What is a GraphQL fragment?
+✅ Answer: Reusable group of fields.
+
+Q9. Why does GraphQL return 200 even on errors?
+✅ Answer: HTTP request was successful; logical errors captured inside the errors array.
+
+Q10. Difference between errors and data fields?
+✅ Answer:
+
+errors: error details (server-side validation failures etc.)
+
+data: successful query response
+
+Q11. What are GraphQL Variables?
+✅ Answer: Placeholders for dynamic values inside queries.
+
+Q12. How to pass variables in GraphQL call?
+✅ Answer:
+{
+  "query": "query getUser($id: ID!) { user(id: $id) { name } }",
+  "variables": { "id": "123" }
+}
+C. 📈 GraphQL Framework Questions
+Q13. How to structure GraphQL automation framework?
+✅ Answer:
+
+DTOs
+
+ApiActions classes
+
+Validators
+
+Payload builders
+
+Config classes for tokens/URLs
+
+Q14. How to deserialize GraphQL response?
+✅ Answer: Use Jackson ObjectMapper into DTOs.
+
+Q15. How do you validate no GraphQL errors?
+✅ Answer: Assert responseBody.errors == null or errors.isEmpty().
+
+Q16. How to test GraphQL pagination?
+✅ Answer: Loop through pages while hasMore = true.
+
+Q17. How to automate dynamic field validations?
+✅ Answer: Map unknown fields to Map<String, Object> or use Jackson JsonNode.
+
+Q18. What if field name changes dynamically?
+✅ Answer: Use flexible DTOs or soft assertions with fallback handling.
+
+D. 🚀 GraphQL Real-world Test Scenarios
+Q19. How to validate GraphQL mutation results?
+✅ Answer: Check id or confirmation field returned.
+
+Q20. Can a GraphQL query and mutation be combined?
+✅ Answer: No, they should be separate operations.
+
+Q21. How to validate GraphQL subscriptions (Websocket)?
+✅ Answer: Use websocket clients like Socket.IO, Apollo, or MockWebServer.
+
+Q22. How to validate nested responses?
+✅ Answer: Write deep DTO mapping or use JsonPath.
+
+Q23. What to validate inside a GraphQL Error Object?
+✅ Answer:
+
+message
+
+locations
+
+path
+
+extensions
+
+Q24. How to handle partial success in GraphQL?
+✅ Answer: Validate available data, log/handle expected errors gracefully.
+
+Q25. What retry strategy for unstable GraphQL APIs?
+✅ Answer: Retry mechanism if specific known transient errors occur.
+
+Q26. Best practice to build GraphQL query strings?
+✅ Answer: Externalize queries into .graphql files and load at runtime.
+
+Q27. How to debug GraphQL requests?
+✅ Answer: Use GraphiQL, Postman, Apollo Playground.
+
+Q28. How to handle Authentication in GraphQL API automation?
+✅ Answer:
+
+OAuth tokens
+
+Basic Authentication headers
+
+CSRF protection handling
+
+Q29. When would you use JsonNode over DTO?
+✅ Answer: When schema is highly dynamic or partially unknown.
+
+F. 🧠 GraphQL Special Handling in Automation
+Q30. What is batching in GraphQL?
+✅ Answer: Sending multiple queries in a single request.
+
+Q31. Can a GraphQL server enforce rate limits?
+✅ Answer: Yes, usually via server settings or middleware like Apollo Rate Limit.
+
+Q32. How do you validate mandatory vs optional fields?
+✅ Answer: Assert presence or absence based on field definition (nullable / non-nullable).
+
+Q33. What if GraphQL field becomes deprecated?
+✅ Answer: Server will mark it with @deprecated in schema.
+
+Q34. How to automate schema validation?
+✅ Answer: Run introspection query and validate types programmatically.
+
+Q35. How to simulate negative scenarios in GraphQL testing?
+✅ Answer: Pass invalid field types, missing variables, wrong query structure.
+
+G. ⚡ Quick Rapid-Fire Questions
+Q36. Single endpoint or multiple in GraphQL? ➔ Single.
+
+Q37. Is GraphQL response always JSON? ➔ Yes.
+
+Q38. Which tool is used for GraphQL schema exploration? ➔ GraphiQL.
+
+Q39. What is Relay? ➔ A GraphQL client framework by Facebook.
+
+Q40. Main advantage of GraphQL over REST? ➔ Exact data fetching, no over-fetching.
+
+Q41. GraphQL errors inside HTTP 200 or 400? ➔ Inside HTTP 200.
+
+Q42. What happens when no fields requested in query? ➔ Error.
+
+Q43. How to fetch only selected fields in GraphQL? ➔ Explicitly mention fields in query.
+
+Q44. Can GraphQL replace REST fully? ➔ Depends, not always.
+
+Q45. Can you send query parameters in URL in GraphQL? ➔ No, must be POST body.
+
+Q46. Can GraphQL do file uploads? ➔ Yes, via special multipart requests.
+
+Q47. Main security risk in GraphQL? ➔ Overexposed fields (deep queries).
+
+Q48. Can GraphQL be versioned? ➔ Not by endpoint, only by schema evolution.
+
+Q49. How to validate dynamic queries? ➔ JsonNode parsing and deep validation.
+
+Q50. Main reason GraphQL becomes slow? ➔ N+1 problem (many DB queries inside resolvers).
+

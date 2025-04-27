@@ -1,0 +1,62 @@
+8️⃣ Real-World Scenario Questions
+
+1️⃣ Fetch a list of products and sort them by price
+Response response = RestAssured.get("https://api.example.com/products");
+List<Integer> prices = response.jsonPath().getList("products.price");
+Collections.sort(prices);
+System.out.println("Sorted Prices: " + prices);
+
+============================================================================================================================================================
+
+2️⃣ Place an order and verify it appears in order history
+Response orderResponse = RestAssured.given()
+    .body("{\"product_id\": 123, \"quantity\": 1}")
+    .post("https://api.example.com/orders");
+String orderId = orderResponse.jsonPath().getString("order_id");
+Assert.assertNotNull(orderId);
+
+Response historyResponse = RestAssured.get("https://api.example.com/orders/history");
+List<String> orderIds = historyResponse.jsonPath().getList("orders.id");
+Assert.assertTrue(orderIds.contains(orderId));
+
+============================================================================================================================================================
+
+3️⃣ Validate if a discount is applied correctly
+Response discountResponse = RestAssured.get("https://api.example.com/cart");
+float discount = discountResponse.jsonPath().getFloat("discount");
+Assert.assertTrue(discount > 0, "Discount should be applied");
+
+============================================================================================================================================================
+
+4️⃣ A valid user should get a token
+Response loginResponse = RestAssured.given()
+    .body("{\"username\": \"validUser\", \"password\": \"password123\"}")
+    .post("https://api.example.com/login");
+Assert.assertNotNull(loginResponse.jsonPath().getString("token"));
+
+============================================================================================================================================================
+
+5️⃣ An invalid user should receive a 401 response
+Response invalidLoginResponse = RestAssured.given()
+    .body("{\"username\": \"invalidUser\", \"password\": \"wrongPass\"}")
+    .post("https://api.example.com/login");
+Assert.assertEquals(invalidLoginResponse.getStatusCode(), 401);
+
+============================================================================================================================================================
+
+6️⃣ How would you test an API with rate-limiting?
+for (int i = 0; i < 10; i++) {
+    Response rateLimitResponse = RestAssured.get("https://api.example.com/rate-limit");
+    if (rateLimitResponse.getStatusCode() == 429) {
+        System.out.println("Rate limit exceeded on attempt " + (i + 1));`
+        break;
+    }
+}
+
+============================================================================================================================================================
+
+7️⃣ How do you verify API performance in Rest Assured?
+long startTime = System.currentTimeMillis();
+RestAssured.get("https://api.example.com/performance");
+long endTime = System.currentTimeMillis();
+System.out.println("API Response Time: " + (endTime - startTime) + " ms");

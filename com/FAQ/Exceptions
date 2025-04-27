@@ -1,0 +1,77 @@
+7️⃣ Exception Handling & Debugging in Rest Assured
+
+1️⃣ How do you handle timeouts in Rest Assured?
+✅ Use .timeout() with RequestSpecBuilder or configure connection and socket timeouts.
+RequestSpecification requestSpec = new RequestSpecBuilder()
+        .setConfig(RestAssured.config().httpClient(
+            HttpClientConfig.httpClientConfig()
+                .setParam("http.connection.timeout", 5000)
+                .setParam("http.socket.timeout", 5000)))
+        .build();
+
+============================================================================================================================================================
+
+2️⃣ What happens if an API does not return a response?
+✅ Rest Assured will throw an exception (e.g., ReadTimeoutException or ConnectException).
+✅ Use try-catch to handle it.
+try {
+    Response response = RestAssured.given().spec(requestSpec).get("https://api.example.com");
+} catch (Exception e) {
+    System.out.println("API did not return a response: " + e.getMessage());
+}
+
+============================================================================================================================================================
+
+3️⃣ How do you debug failed API tests?
+✅ Enable logging for request and response details.
+RestAssured.given()
+    .log().all() Logs request details
+    .when()
+    .get("https://api.example.com")
+    .then()
+    .log().all(); Logs response details
+
+============================================================================================================================================================
+
+4️⃣ How do you handle unexpected status codes?
+✅ Use assertions to validate expected status codes.
+Response response = RestAssured.get("https://api.example.com");
+if (response.getStatusCode() != 200) {
+    System.out.println("Unexpected status code: " + response.getStatusCode());
+}
+
+============================================================================================================================================================
+
+5️⃣ How do you validate error messages in failed responses?
+✅ Extract and assert error messages from the response body.
+Response response = RestAssured.get("https://api.example.com/error");
+String errorMessage = response.jsonPath().getString("error.message");
+Assert.assertEquals(errorMessage, "Invalid request");
+
+============================================================================================================================================================
+
+6️⃣ How do you handle API failures gracefully?
+✅ Use try-catch and default fallback values.
+try {
+    Response response = RestAssured.get("https://api.example.com");
+    System.out.println(response.asString());
+} catch (Exception e) {
+    System.out.println("API call failed, using default response.");
+}
+
+============================================================================================================================================================
+
+7️⃣ How do you retry failed API requests?
+✅ Use a loop to retry the request in case of failure.
+int retries = 3;
+for (int i = 0; i < retries; i++) {
+    try {
+        Response response = RestAssured.get("https://api.example.com");
+        if (response.getStatusCode() == 200) {
+            System.out.println("Success on attempt " + (i + 1));
+            break;
+        }
+    } catch (Exception e) {
+        System.out.println("Attempt " + (i + 1) + " failed. Retrying...");
+    }
+}

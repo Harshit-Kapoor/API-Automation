@@ -1,0 +1,220 @@
+1. How do you extract a single value from a JSON response using Rest Assured?
+To extract a value from a JSON response, we use JsonPath.
+
+Response response = given()
+    .when().get("https://api.example.com/users/1");
+
+JsonPath jsonPath = response.jsonPath();
+String name = jsonPath.getString("name");
+
+System.out.println("Extracted Name: " + name);
+
+============================================================================================================================================================
+
+2. How do you validate multiple JSON response values?
+Use multiple body() assertions to validate different fields in the JSON response.
+
+given()
+    .when().get("https://api.example.com/users/1")
+    .then()
+    .body("name", equalTo("John Doe"))
+    .body("age", equalTo(30))
+    .body("email", equalTo("john.doe@example.com"));
+
+============================================================================================================================================================
+
+3. How do you handle dynamic response values in Rest Assured?
+You can use contains() to check for values dynamically when response values change.
+
+given()
+    .when().get("https://api.example.com/products")
+    .then()
+    .body("productNames", hasItem("Laptop")); // Checks if the list contains "Laptop"
+To validate dynamic values, you can extract and validate them at runtime:
+
+Response response = given()
+    .when().get("https://api.example.com/orders");
+
+List<String> orderIds = response.jsonPath().getList("orders.id");
+Assert.assertFalse(orderIds.isEmpty()); // Ensure there are some order IDs
+
+============================================================================================================================================================
+
+4. How do you handle different content types like JSON, XML?
+Specify Content-Type in the request header to handle different response formats.
+
+For JSON:
+
+given()
+    .header("Accept", "application/json")
+    .when().get("https://api.example.com/users")
+    .then().contentType(ContentType.JSON);
+For XML:
+
+given()
+    .header("Accept", "application/xml")
+    .when().get("https://api.example.com/users")
+    .then().contentType(ContentType.XML);
+
+============================================================================================================================================================
+
+5. How do you extract response headers?
+Use response.getHeader("header-name") to retrieve header values.
+
+
+Response response = given()
+    .when().get("https://api.example.com/users/1");
+
+String contentType = response.getHeader("Content-Type");
+System.out.println("Content-Type: " + contentType);
+
+============================================================================================================================================================
+
+6. How do you send a POST request with a JSON body?
+To send a POST request, use .body() with a JSON string.
+
+
+String requestBody = "{ \"name\": \"John Doe\", \"age\": 30 }";
+
+given()
+    .header("Content-Type", "application/json")
+    .body(requestBody)
+    .when().post("https://api.example.com/users")
+    .then().statusCode(201);
+
+============================================================================================================================================================
+
+7. How do you upload a file using Rest Assured?
+Use .multiPart() to upload files.
+
+File file = new File("path/to/file.jpg");
+
+given()
+    .multiPart("file", file)
+    .when().post("https://api.example.com/upload")
+    .then().statusCode(200);
+
+============================================================================================================================================================
+
+8. How do you handle query parameters in Rest Assured?
+Query parameters are added using .queryParam().
+
+given()
+    .queryParam("name", "John")
+    .queryParam("age", 30)
+    .when().get("https://api.example.com/users")
+    .then().statusCode(200);
+
+============================================================================================================================================================
+
+9. How do you handle APIs that return nested JSON objects?
+Use dot notation to extract values from nested JSON responses.
+
+Example JSON Response:
+
+json
+Copy
+Edit
+{
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "address": {
+      "city": "New York",
+      "zip": "10001"
+    }
+  }
+}
+Extract values:
+
+
+Response response = given()
+    .when().get("https://api.example.com/users/1");
+
+JsonPath jsonPath = response.jsonPath();
+String city = jsonPath.getString("user.address.city");
+System.out.println("City: " + city);
+
+============================================================================================================================================================
+
+10. How do you validate response time in Rest Assured?
+Use .time() to assert the response time.
+
+given()
+    .when().get("https://api.example.com/users")
+    .then().time(lessThan(2000L)); // Response time should be less than 2000 ms
+
+============================================================================================================================================================
+
+11. How do you validate if a response contains a specific field?
+Use hasKey() to check if a JSON response has a particular key.
+
+
+given()
+    .when().get("https://api.example.com/users/1")
+    .then()
+    .body("$", hasKey("name")); // Checks if "name" exists in JSON
+
+============================================================================================================================================================
+
+12. How do you send form-data parameters in a POST request?
+Use .formParam() to send form data.
+
+given()
+    .contentType("application/x-www-form-urlencoded")
+    .formParam("username", "testuser")
+    .formParam("password", "pass123")
+    .when().post("https://api.example.com/login")
+    .then().statusCode(200);
+
+============================================================================================================================================================
+
+13. How do you handle API authentication using Rest Assured?
+Basic Authentication:
+
+given()
+    .auth().basic("username", "password")
+    .when().get("https://api.example.com/protected")
+    .then().statusCode(200);
+Bearer Token Authentication:
+
+
+given()
+    .header("Authorization", "Bearer your_token_here")
+    .when().get("https://api.example.com/data")
+    .then().statusCode(200);
+
+============================================================================================================================================================
+
+14. How do you handle APIs that return paginated data?
+
+Extract pagination details from response and request the next page.
+
+Response response = given()
+    .queryParam("page", 1)
+    .when().get("https://api.example.com/users");
+
+int totalPages = response.jsonPath().getInt("total_pages");
+
+for (int i = 1; i <= totalPages; i++) {
+    given().queryParam("page", i)
+           .when().get("https://api.example.com/users")
+           .then().statusCode(200);
+}
+
+============================================================================================================================================================
+
+15. How do you chain multiple API requests?
+Extract a value from one API and use it in another request.
+
+
+Response response = given()
+    .when().post("https://api.example.com/login")
+    .then().extract().response();
+
+String token = response.jsonPath().getString("token");
+
+given()
+    .header("Authorization", "Bearer " + token)
+    .when().get("https://api.example.com/dashboard")
+    .then().statusCode(200);
